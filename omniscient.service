@@ -1,0 +1,14 @@
+[Unit]
+Description=Omniscient Framework - Full System Integration
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /opt/omniscient/ai/core_runtime/omniscient_api.py
+WorkingDirectory=/opt/omniscient/ai/core_runtime
+Restart=always
+User=jeremy
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
+

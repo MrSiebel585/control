@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+
+import os
+import datetime
+from pathlib import Path
+
+# ─── OMNISCIENT FRAMEWORK HOOKS ────────────────────────────────────────────
+OMNISCIENT = "/opt/omniscient"
+OMNISCIENT_LOGS = os.path.join(OMNISCIENT, "logs")
+OMNISCIENT_HOME = os.path.join(OMNISCIENT, "home", os.getenv("USER", "unknown"))
+WHITERABBIT = os.path.join(OMNISCIENT, "ai/models/WhiteRabbitNeo-2.5-Qwen-2.5-Coder-7B-IQ2_M.gguf")
+
+# Logging setup
+script_name = Path(__file__).stem
+logfile = os.path.join(OMNISCIENT_LOGS, f"{script_name}.log")
+
+def log(message):
+    timestamp = datetime.datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
+    formatted = f"{timestamp} {message}"
+    print(formatted)
+    with open(logfile, "a") as f:
+        f.write(formatted + "\n")
+
+# ───────────────────────────────────────────────────────────────────────────
+

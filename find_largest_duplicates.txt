@@ -1,0 +1,12 @@
+find /opt/omniscient /opt/sdb1 -type f -exec sha256sum "{}" + 2>/dev/null \
+| sort \
+| awk '{print $1}' \
+| uniq -d \
+| while read hash; do
+  grep "$hash" < <(find /opt/omniscient /opt/sdb1 -type f -exec sha256sum "{}" + 2>/dev/null) \
+  | awk '{print $2}' \
+  | xargs -I{} du -b {} \
+  | sort -nr \
+  | head -n 1
+done \
+| sort -nr | head -n 20

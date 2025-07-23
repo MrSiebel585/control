@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+import os, sys, subprocess, json
+
+MODULES_DIR = "/opt/omniscient/modules"
+
+def list_modules():
+    return [m for m in os.listdir(MODULES_DIR) if os.path.isdir(os.path.join(MODULES_DIR, m))]
+
+def module_help(module):
+    print(f"\n[ {module.upper()} MODULE ]")
+    print("Usage:")
+    print(f"  omniscientctl {module} --start")
+    print(f"  omniscientctl {module} --stop")
+    print(f"  omniscientctl {module} --status")
+    print(f"  omniscientctl {module} --run [args]")
+    print(f"  omniscientctl {module} --config")
+
+def manage_service(module, action):
+    svc = f"{module}.service"
+    subprocess.run(["sudo", "systemctl", action, svc])
+
+def run_module(module, args):
+    module_path = os.path.join(MODULES_DIR, module, "main.py")
+    subprocess.run(["python3", module_path] + args)
+
+def print_config(module):
+    config_path = os.path.join(MODULES_DIR, module, "config.json")
+    if os.path.exists(config_path):
+        with open(config_path) as f:
+            print(json.dumps(json.load(f), indent=2))
+    else:
+        print("[!] No config found.")
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: omniscientctl <module> [--command]")
+        print("Available modules:", ", ".join(list_modules()))
+        return
+
+    module = sys.argv[1]
+    args = sys.argv[2:]
+
+    if module not in list_modules():
+        print(f"[!] Unknown module: {module}")
+        return
+
+    if "--help" in args or len(args) == 0:
+        module_help(module)
+    elif "--start" in args:
+        manage_service(module, "start")
+    elif "--stop" in args:
+        manage_service(module, "stop")
+    elif "--status" in args:
+        manage_service(module, "status")
+    elif "--config" in args:
+        print_config(module)
+    elif "--run" in args:
+        idx = args.index("--run")
+        run_module(module, args[idx + 1:])
+    else:
+        module_help(module)
+
+if __name__ == "__main__":
+    main()

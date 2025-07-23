@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# Omniscient CLI Launcher
+OMNIROOT="/opt/omniscient"
+CONF="$OMNIROOT/omniscient.conf"
+LOG="$OMNIROOT/logs/omniscientctl.log"
+
+mkdir -p "$(dirname "$LOG")"
+echo "[+] OmniscientCTL invoked at $(date) with args: $@" >> "$LOG"
+
+# Load config defaults
+if [[ -f "$CONF" ]]; then
+    source <(grep -E '^[A-Z_]+=' "$CONF")
+else
+    MODEL="gpt4all"
+    LOG_LEVEL="INFO"
+    OLLAMA_API="http://localhost:11434/api/generate"
+fi
+
+# Helper: Check if virtual environment is active or source it
+if [[ -z "$VIRTUAL_ENV" ]]; then
+    source "$OMNIROOT/venv/bin/activate"
+fi
+
+case "$1" in
+
+    "help"|"--help"|"-h")
+        echo -e "\nOmniscient Control Interface (omniscientctl)"
+        echo "Usage:"
+        echo "  omniscientctl summarize-syslog [file]"
+        echo "  omniscientctl prompt \"your prompt\" [engine]"
+        echo "  omniscientctl run-ui"
+        echo "  omniscientctl setup-ai"
+        echo "  omniscientctl help"
+        ;;
+
+    "summarize-syslog")
+        file=${2:-/var/log/syslog}
+        python3 "$OMNIROOT/ai/tools/syslog_summarizer.py" "$file"
+        ;;
+
+    "prompt")
+        prompt="$2"
+        engine=${3:-$MODEL}
+        if [[ "$engine" == "ollama" ]]; then
+            response=$(curl -s -X POST "$OLLAMA_API" \
+                -H "Content-Type: application/json" \
+                -d "{\"model\": \"$MODEL\", \"prompt\": \"$prompt\"}")
+            echo -e "\033[1;32mAI (Ollama):\033[0m $(echo "$response" | jq -r '.response // .result')"
+        else
+            python3 -c "from ai.omnibridge import generate_response; print(generate_response(\"$prompt\", engine=\"$engine\"))"
+        fi
+        ;;
+
+    "run-ui")
+        streamlit run "$OMNIROOT/web/engine_selector.py"
+        ;;
+
+    "setup-ai")
+        bash "$OMNIROOT/init/setup-ai.sh"
+        ;;
+
+    *)
+        echo "[✘] Unknown command: $1"
+        echo "Run 'omniscientctl help' for usage."
+        ;;
+esac

@@ -1,105 +1,240 @@
 #!/bin/bash
-# omniscientctl: Unified CLI for Omniscient Framework
 
-# ─── Auto-source Environment ───────────────────────────────
-[ -f /opt/omniscient/.env ] && source /opt/omniscient/.env
-source /opt/omniscient/.autoenv/activate.sh
+DYNAMICALLY_LOAD_DIRS=(
+  "/opt/omniscient/control/omniscientctl.d"
+  "/opt/omniscient/control/omniscientctl.d/modules"
+)
 
-OMNIROOT="/opt/omniscient"
-CONF="$OMNIROOT/omniscient.conf"
-LOGFILE="$PROMPT_LOG"
-mkdir -p "$(dirname "$LOGFILE")"
-echo "[+] OmniscientCTL invoked at $(date) with args: $*" >> "$LOGFILE"
+LOAD_DIRS=(
+  "/opt/omniscient/core"
+  "/opt/omniscient/bin"
+  "/opt/omniscient/ai"
+  "/opt/omniscient/menus"
+  "/opt/omniscient/malformed"
+  "/opt/omniscient/offensive"
+  "/opt/omniscient/system"
+  "/opt/omniscient/scripts"
+  "/opt/omniscient/osint"
+  "/opt/omniscient/logs"
+  "/opt/omniscient/forensics"
+  "/opt/omniscient/modules"
+  "/opt/omniscient/omnieye"
+  "/opt/omniscient/omnilog"
+  "/opt/omniscient/management"
+  "/opt/omniscient/scripts"
+  "/opt/omniscient/manpages"
+  "/opt/omniscient/readme"
+  "/opt/omniscient/omniscientctl.d"
+  "/opt/omniscient/python"
 
-# ─── Load Config via crudini if available ──────────────────
-if command -v crudini &> /dev/null && [[ -f "$CONF" ]]; then
-    MODEL=$(crudini --get "$CONF" models MODEL_BACKEND 2>/dev/null || echo "gpt4all")
-    LOG_LEVEL=$(crudini --get "$CONF" core LOG_LEVEL 2>/dev/null || echo "INFO")
-    OLLAMA_API=$(crudini --get "$CONF" ollama API_URL 2>/dev/null || echo "http://localhost:11434/api/generate")
+
+)
+
+# find functions with find, fzf, grep, sed, awk
+
+# network funbctions
+
+# bash functions
+
+# omniscientctl compare function 
+
+# omniscient push services
+
+# github functions
+
+# ollama one liner wrapper functions
+
+# lmstudio functions
+
+# huggingface api rag with docker
+
+# ai pipeline logs digest
+
+# metacognitive systems loader
+omniscient_backend, amnesty, singularity, OmniDevOps, SentinelFS, OmniscientAI, Bulletproof,
+
+# self-healing framework
+
+# omnieyectl, ollamamanctl, omnilogctl, omnipushctl, llmctl,
+
+# set-system-functions
+
+# crosstrax sql backend connectors
+
+# user_scripts_loader.sh
+
+
+# bootstap_python_modules
+
+# load script viewer and editor
+if [[ -f "/opt/omniscient/bin/script_viewer.sh" ]]; then
+  source "/opt/omniscient/bin/script_viewer.sh"
+
+  echo "[+] Script viewer loaded successfully."
 else
-    MODEL="gpt4all"
-    LOG_LEVEL="INFO"
-    OLLAMA_API="http://localhost:11434/api/generate"
+  echo "[✘] Script viewer not found, skipping."
 fi
 
-# ─── Activate Python Venv ──────────────────────────────────
-if [[ -z "$VIRTUAL_ENV" ]]; then
-    for path in "$OMNIROOT/venv/bin/activate" "$OMNIROOT/bin/activate" "$OMNIROOT/.env/bin/activate"; do
-        [[ -f "$path" ]] && source "$path" && break
+# Load dynamic directories if they exist
+for dir in "${DYNAMICALLY_LOAD_DIRS[@]}"; do
+  if [[ -d "$dir" ]]; then
+    echo "[+] Loading dynamic directory: $dir"
+    for f in "$dir"/*.bash; do
+      if [[ -f "$f" ]]; then
+        echo "[+] Sourcing $f"
+        source "$f" || echo "[✘] Failed to source $f"
+      else
+        echo "[✘] No bash files found in $dir"
+      fi
     done
+
+    # core bash shell command wrappers
+     
+
+
+# ─── OMNISCIENT FRAMEWORK CLI ───────────────────────────────────────────────
+
+# Auto-source environment
+OMNIROOT="/opt/omniscient"
+[ -f "$OMNIROOT/.env" ] && source "$OMNIROOT/.env"
+source "$OMNIROOT/.autoenv/activate.sh"
+
+SCRIPT_DIRS=("ai" "core" "bin" "menus" "modules" "malformed" "offensive" "system" "scripts" "osint" "logs")
+OMNIDIR="$OMNIROOT/control/omniscientctl.d"
+CONF="$OMNIROOT/omniscient.conf"
+LOG="$OMNIROOT/logs/omniscientctl.log"
+
+mkdir -p "$(dirname "$LOG")"
+echo "[+] OmniscientCTL invoked at $(date) with args: $*" >> "$LOG"
+
+# Load drop-in shell modules
+for f in "$OMNIDIR"/*.bash; do
+  [[ -f "$f" ]] && source "$f"
+done
+
+for f in "$OMNIDIR"/bin/*.sh; do
+  [[ -f "$f" ]] && source "$f"
+done
+
+for f in "$OMNIDIR"/scripts/*.sh; do
+  [[ -f "$f" ]] && source "$f"
+done
+
+# --------------------------
+# Helper functions
+# --------------------------
+
+log_action() {
+  echo "[$(date +'%F %T')] $1" | tee -a "$PROMPT_LOG"
+}
+
+restart_services() {
+  log_action "Restarting core services: $SERVICES_TO_ENABLE"
+  IFS=',' read -ra SERVICES <<< "$SERVICES_TO_ENABLE"
+  for service in "${SERVICES[@]}"; do
+    echo "Restarting $service..."
+    sudo systemctl restart "$service"
+  done
+  show_menu
+}
+
+stop_services() {
+  log_action "Stopping core services: $SERVICES_TO_ENABLE"
+  IFS=',' read -ra SERVICES <<< "$SERVICES_TO_ENABLE"
+  for service in "${SERVICES[@]}"; do
+    echo "Stopping $service..."
+    sudo systemctl stop "$service"
+  done
+  show_menu
+}
+
+health_check() {
+  log_action "Checking health of core services"
+  IFS=',' read -ra SERVICES <<< "$SERVICES_TO_ENABLE"
+  for service in "${SERVICES[@]}"; do
+    STATUS=$(systemctl is-active "$service")
+    echo "$service → $STATUS"
+  done
+  show_menu
+}
+
+run_plugins() {
+  local plugin_dir="${OMNISCIENT_PLUGIN_DIR:-$OMNIROOT/plugins}"
+  echo -e "\n🧩 Executing plugins in $plugin_dir"
+  for plugin in "$plugin_dir"/*.sh; do
+    [ -x "$plugin" ] && echo "→ Running $(basename "$plugin")" && bash "$plugin"
+  done
+  show_menu
+}
+
+browse_directories() {
+  echo -e "\n📂 Available Script Categories:"
+  select dir in "${SCRIPT_DIRS[@]}" "Back"; do
+    [[ "$REPLY" == $(( ${#SCRIPT_DIRS[@]} + 1 )) ]] && show_menu && return
+    TARGET="$OMNIROOT/$dir"
+    if [[ -d "$TARGET" ]]; then
+      echo -e "\n📁 $dir Directory Contents:"
+      mapfile -t files < <(find "$TARGET" -maxdepth 1 -type f \( -name "*.sh" -o -name "*.bash" \))
+      select file in "${files[@]}" "Back"; do
+        [[ "$REPLY" == $(( ${#files[@]} + 1 )) ]] && browse_directories && return
+        [[ -f "$file" ]] && echo -e "\n🚀 Executing: $file\n" && log_action "Executing user script: $file" && bash "$file" && break
+        echo "Invalid selection. Try again."
+      done
+    else
+      echo "[✘] Directory not found: $TARGET"
+    fi
+    break
+  done
+}
+
+# --------------------------
+# Config values
+# --------------------------
+
+if command -v crudini &> /dev/null && [[ -f "$CONF" ]]; then
+  MODEL=$(crudini --get "$CONF" models MODEL_BACKEND 2>/dev/null || echo "gpt4all")
+  LOG_LEVEL=$(crudini --get "$CONF" core LOG_LEVEL 2>/dev/null || echo "INFO")
+  OLLAMA_API=$(crudini --get "$CONF" ollama API_URL 2>/dev/null || echo "http://localhost:11434/api/generate")
+else
+  MODEL="gpt4all"
+  LOG_LEVEL="INFO"
+  OLLAMA_API="http://localhost:11434/api/generate"
 fi
 
-# ─── Auto-register Modules ─────────────────────────────────
+# Activate Python virtual environment
+if [[ -z "$VIRTUAL_ENV" ]]; then
+  for path in "$OMNIROOT/venv/bin/activate" "$OMNIROOT/bin/activate" "$OMNIROOT/.env/bin/activate"; do
+    [[ -f "$path" ]] && source "$path" && break
+  done
+fi
+
+# --------------------------
+# Module auto-registration
+# --------------------------
+
 MODULE_DIR="$OMNIROOT/modules"
 declare -A MODULES=()
+
 if [[ -d "$MODULE_DIR" ]]; then
-    for mod_file in "$MODULE_DIR"/mod_*.sh; do
-        [[ -f "$mod_file" ]] || continue
-        mod_name=${mod_file##*/mod_}
-        mod_name=${mod_name%.sh}
-        enabled="true"
-        if command -v crudini &> /dev/null && [[ -f "$CONF" ]]; then
-            enabled=$(crudini --get "$CONF" modules "$mod_name" 2>/dev/null || echo "true")
-        fi
-        if [[ "$enabled" == "true" ]]; then
-            source "$mod_file"
-            MODULES["$mod_name"]="mod_${mod_name}"
-        fi
-    done
+  for mod_file in "$MODULE_DIR"/mod_*.sh; do
+    [[ -f "$mod_file" ]] || continue
+    mod_basename=$(basename "$mod_file" .sh)
+    mod_name=${mod_basename#mod_}
+    enabled="true"
+    if command -v crudini &> /dev/null && [[ -f "$CONF" ]]; then
+      enabled=$(crudini --get "$CONF" modules "$mod_name" 2>/dev/null || echo "true")
+    fi
+    if [[ "$enabled" == "true" ]]; then
+      source "$mod_file"
+      MODULES["$mod_name"]="mod_${mod_name}"
+    fi
+  done
 fi
 
-# ─── Core Utility Functions ────────────────────────────────
-log_action() {
-    echo "[$(date +'%F %T')] $1" | tee -a "$LOGFILE"
-}
+# --------------------------
+# Interactive Menu
+# --------------------------
 
-show_help() {
-    echo -e "\nOmniscient CLI Usage:\n"
-    echo "  omniscientctl <command> [args...]"
-    echo
-    echo "Available commands from modules:"
-    for cmd in "${!MODULES[@]}"; do
-        help_func="mod_${cmd}_help"
-        if declare -f "$help_func" > /dev/null; then
-            echo -n "  $cmd - "; $help_func
-        else
-            echo "  $cmd"
-        fi
-    done
-    echo
-    echo "Additional commands:"
-    echo "  prompt \"<text>\" [engine]   Send prompt to engine (gpt4all, ollama, openai)"
-    echo "  omnieye-module              Run the Omnieye subsystem"
-    echo "  logs                       Tail last 50 log entries"
-    echo "  version                    Show module versions"
-    echo "  test-module <mod>          Run tests for module"
-    echo "  help                       Show this help message"
-    echo
-}
-
-show_versions() {
-    echo "Omniscient Framework Modules Versions:"
-    for cmd in "${!MODULES[@]}"; do
-        version="${MOD_VERSION:-unknown}"
-        version="$(eval echo \${MOD_VERSION_${cmd}:-$version})"
-        echo "  $cmd : $version"
-    done
-}
-
-run_module_test() {
-    local mod="$1"
-    local test_func="mod_${mod}_test"
-    if [[ -z "$mod" ]]; then
-        echo "[✘] Specify a module to test"; return 1
-    fi
-    if ! declare -f "$test_func" > /dev/null; then
-        echo "[!] No tests defined for module '$mod'"; return 1
-    fi
-    echo "[*] Running tests for module '$mod'..."
-    $test_func
-}
-
-# ─── Interactive Menu Mode ─────────────────────────────────
 show_menu() {
   echo -e "\n🧠 Omniscient Control Panel"
   echo "────────────────────────────"
@@ -107,8 +242,13 @@ show_menu() {
   echo "2) Run AI summary process"
   echo "3) Trigger scheduled maintenance"
   echo "4) Start core services"
-  echo "5) Show system status"
-  echo "6) Exit"
+  echo "5) Restart core services"
+  echo "6) Stop core services"
+  echo "7) Check service health"
+  echo "8) Show system status"
+  echo "9) Run plugins"
+  echo "10) Explore script directories"
+  echo "11) Exit"
   echo "────────────────────────────"
   read -p "Enter selection: " choice
   case $choice in
@@ -116,8 +256,13 @@ show_menu() {
     2) run_summary;;
     3) trigger_maintenance;;
     4) start_services;;
-    5) show_status;;
-    6) exit 0;;
+    5) restart_services;;
+    6) stop_services;;
+    7) health_check;;
+    8) show_status;;
+    9) run_plugins;;
+    10) browse_directories;;
+    11) exit 0;;
     *) echo "Invalid option"; sleep 1; show_menu;;
   esac
 }
@@ -162,45 +307,81 @@ show_status() {
   log_action "Gathering system status info"
   echo "Uptime: $(uptime -p)"
   echo "IP: $(hostname -I | awk '{print $1}')"
-  echo "Disk:"; df -h | grep -E '/$|/opt|/var'
-  echo "Memory:"; free -h | grep -v Swap
+  echo "Disk:"
+  df -h | grep -E '/$|/opt|/var'
+  echo "Memory:"
+  free -h | grep -v Swap
   show_menu
 }
 
-# ─── CLI Entry Point ───────────────────────────────────────
+# --------------------------
+# CLI Dispatch
+# --------------------------
+
 if [[ -z "$1" ]]; then
-    clear; show_menu; exit 0
+  clear
+  show_menu
+  exit 0
 fi
 
 case "$1" in
-  help) show_help; exit 0;;
-  version) show_versions; exit 0;;
-  test-module) shift; run_module_test "$1"; exit $?;;
+  help) show_help; exit 0 ;;
+  version) show_versions; exit 0 ;;
+  test-module) shift; run_module_test "$1"; exit $? ;;
   prompt)
-    prompt_text="$2"; engine="${3:-$MODEL}"
-    if [[ -z "$prompt_text" ]]; then echo "[✘] Please provide prompt text."; exit 1; fi
+    prompt_text="$2"
+    engine="${3:-$MODEL}"
+    if [[ -z "$prompt_text" ]]; then
+      echo "[✘] Please provide prompt text."
+      exit 1
+    fi
     if [[ "$engine" == "ollama" ]]; then
-      response=$(curl -s -X POST "$OLLAMA_API" -H "Content-Type: application/json" -d "{\"model\": \"$MODEL\", \"prompt\": \"$prompt_text\"}")
+      response=$(curl -s -X POST "$OLLAMA_API" -H "Content-Type: application/json" \
+        -d "{\"model\": \"$MODEL\", \"prompt\": \"$prompt_text\"}")
       echo -e "\033[1;32mAI (Ollama):\033[0m $(echo "$response" | jq -r '.response // .result')"
     elif [[ "$engine" == "openai" ]]; then
-      python3 -c "import os, openai; openai.api_key = os.getenv('OPENAI_API_KEY');\ncompletion = openai.ChatCompletion.create(model='$MODEL', messages=[{'role': 'user', 'content': '$prompt_text'}]);\nprint('\033[1;32mAI (OpenAI):\033[0m ' + completion.choices[0].message.content.strip())"
+      python3 -c "
+import os, openai
+openai.api_key = os.getenv('OPENAI_API_KEY')
+try:
+    response = openai.ChatCompletion.create(
+        model='$MODEL',
+        messages=[{'role': 'user', 'content': '$prompt_text'}]
+    )
+    print('\033[1;32mAI (OpenAI):\033[0m', response.choices[0].message.content.strip())
+except Exception as e:
+    print('[✘] OpenAI request failed:', e)
+"
     else
-      echo "AI ($engine): $prompt_text"
+      python3 -c "print(f'AI ($engine): $prompt_text')"
     fi
-    exit 0;;
-  omnieye-module) bash "$OMNIROOT/omnieye-blackbox/omnieye_module.sh"; exit $?;;
-  logs) tail -n 50 "$LOGFILE"; exit 0;;
+    exit 0
+    ;;
+  omnieye) bash "$OMNIROOT/omnieye/omnieye_module.sh"; exit $? ;;
+  logs) tail -n 50 "$LOG"; exit 0 ;;
+  rsyslog)
+    shift
+    case "$1" in
+      start) rsyslog_start ;;
+      stop) rsyslog_stop ;;
+      restart) rsyslog_restart ;;
+      status) rsyslog_status ;;
+      reload) rsyslog_reload ;;
+      *) echo "Usage: omniscientctl rsyslog {start|stop|restart|status|reload}"; exit 1 ;;
+    esac
+    exit 0
+    ;;
   *)
     cmd="$1"
     if [[ -n "${MODULES[$cmd]}" ]]; then
-      shift; ${MODULES[$cmd]} "$@"; exit $?;
+      func="${MODULES[$cmd]}"
+      shift
+      $func "$@"
+      exit $?
     else
-      echo "[✘] Unknown command: $cmd"; echo "Run 'omniscientctl help' for usage."; exit 1;
-    fi;;
-esac
-
-case "$1 $2 $3" in
-  ai osint scan)
-    exec /opt/omniscient/plugins/omniscientctl-ai-osint-scan
+      echo "[✘] Unknown command: $cmd"
+      echo "Run 'omniscientctl help' for usage."
+      exit 1
+    fi
     ;;
 esac
